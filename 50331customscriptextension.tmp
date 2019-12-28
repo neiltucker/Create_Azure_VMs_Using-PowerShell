@@ -1,0 +1,38 @@
+﻿
+$AzureStorageAccountName = "Azure\" + $StorageAccountName
+$SecureKey = $StorageAccountKey | ConvertTo-SecureString -AsPlainText -Force
+$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $AzureStorageAccountName,$SecureKey
+$RootURL = "\\" + $StorageAccountName + ".file.core.windows.net\" + $SAShare
+New-PSDrive -Name S -PSProvider FileSystem -Root $RootURL -Credential $Credential
+Copy-Item "S:\50331azuresetup.zip" -Destination $WorkFolder -Recurse -Verbose -Force
+Copy-Item "S:\50331customscriptextension.ps1" -Destination $WorkFolder -Recurse -Verbose -Force
+
+# Configure Remote Settings
+Net LocalGroup "Remote Management Users" /Add Adminz
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Force
+Get-NetFirewallRule *WINRM* | Set-NetFirewallRule -Profile Any -RemoteAddress Any
+Get-NetFirewallRule *RemoteDesktop* | Set-NetFirewallRule -Profile Any -RemoteAddress Any
+# Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+Enable-PSRemoting -SkipNetworkProfileCheck -Force
+Set-WSManQuickConfig -Force
+
+#Configure Lab Environment
+New-Item -Path c:\labfiles.50331d -Type Directory -Force
+New-Item -Path C:\Temp -Type Directory -Force
+New-Item -Path C:\CustomScriptExtension -Type Directory -Force
+$SetupFile = "c:\labfiles.50331d\50331azuresetup.zip"
+$LabfilesFolder = "c:\labfiles.50331d\"
+[Environment]::SetEnvironmentVariable("LABFILESFOLDER", $LabfilesFolder, "Machine")
+[Environment]::SetEnvironmentVariable("WORKFOLDER", $LabfilesFolder, "Machine")
+Install-PackageProvider -Name "PowerShellGet" -Force
+Install-PackageProvider -Name "Nuget" -Force
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+Expand-Archive -LiteralPath $SetupFile -DestinationPath $LabfilesFolder -Force
+Enable-NetFirewallRule -DisplayName "File and Printer Sharing*"
+Get-DNSClient -InterfaceAlias Ethernet* | Set-DNSClient -ConnectionSpecificSuffix "contoso.com"
+# Get-DNSClient -InterfaceAlias Ethernet* | Set-DNSClientServerAddress -ServerAddresses ("192.168.10.100","192.168.20.100")
+reg import c:\labfiles.50331d\LocalLogonAdminz.reg
+REG ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce /d c:\labfiles.50331d\run.cmd /f
+shutdown /r /t 15
+
+
