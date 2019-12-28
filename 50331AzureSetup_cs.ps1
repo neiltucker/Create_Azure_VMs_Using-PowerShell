@@ -5,7 +5,9 @@ $SubscriptionName = (Get-AzureRMSubscription)[0].Name                  # This va
 $CloudDriveMP = (Get-CloudDrive).MountPoint
 New-PSDrive -Name "F" -PSProvider "FileSystem" -Root $CloudDriveMP
 $WorkFolder = "f:\labfiles.50331d\"
-Set-Location $WorkFolder                                               # 50331azuresetup.zip must be in this location
+Set-Location $WorkFolder
+$AzureSetupFiles = $WorkFolder + "50331azuresetup.zip"
+Expand-Archive $AzureSetupFiles $WorkFolder -Force -ErrorAction "SilentlyContinue"
 $Location = "EASTUS"
 $NamePrefix = ("cs" + (Get-Date -Format "HHmmss")).ToLower()           # Replace "cs" with your initials
 $ResourceGroupName = $NamePrefix + "rg"

@@ -2,9 +2,11 @@
 ### Configure Objects & Variables
 Set-StrictMode -Version 2.0
 $SubscriptionName = "Azure Pass"                                       # This variable should be assigned your "Subscription Name"
-$WorkFolder = "c:\labfiles.50331d\"                                    # 50331azuresetup.zip must be in this location and it must be unzipped
+$WorkFolder = "c:\labfiles.50331d\"                                     # 50331azuresetup.zip must be in this location and it must be unzipped
 Set-Location $WorkFolder
-$Location = "eastus"
+$AzureSetupFiles = $WorkFolder + "50331azuresetup.zip"
+Expand-Archive $AzureSetupFiles $WorkFolder -Force -ErrorAction "SilentlyContinue"
+$Location = "EASTUS"
 $NamePrefix = "in" + (Get-Date -Format "HHmmss")                       # Replace "in" with your initials
 $ResourceGroupName = $namePrefix + "rg"
 $StorageAccountName = $namePrefix.tolower() + "sa"                     # Must be lower case
