@@ -16,23 +16,22 @@ Get-NetFirewallRule *RemoteDesktop* | Set-NetFirewallRule -Profile Any -RemoteAd
 Enable-PSRemoting -SkipNetworkProfileCheck -Force
 Set-WSManQuickConfig -Force
 
-#Configure Lab Environment
-New-Item -Path c:\labfiles.50331d -Type Directory -Force
-New-Item -Path C:\Temp -Type Directory -Force
-New-Item -Path C:\CustomScriptExtension -Type Directory -Force
-$SetupFile = "c:\labfiles.50331d\50331azuresetup.zip"
-$LabfilesFolder = "c:\labfiles.50331d\"
-[Environment]::SetEnvironmentVariable("LABFILESFOLDER", $LabfilesFolder, "Machine")
-[Environment]::SetEnvironmentVariable("WORKFOLDER", $LabfilesFolder, "Machine")
+# Configure Lab Environment
+New-Item -Path C:\Classfiles -Type Directory -Force -ErrorAction "SilentlyContinue"
+New-Item -Path C:\Temp -Type Directory -Force -ErrorAction "SilentlyContinue"
+New-Item -Path C:\CustomScriptExtension -Type Directory -Force -ErrorAction "SilentlyContinue"
+$SetupFile = $WorkFolder + "50331azuresetup.zip"
+$Classfiles = "C:\Classfiles\"
+[Environment]::SetEnvironmentVariable("LABFILESFOLDER", $WorkFolder, "Machine")
+[Environment]::SetEnvironmentVariable("WORKFOLDER", $WorkFolder, "Machine")
 Install-PackageProvider -Name "PowerShellGet" -Force
 Install-PackageProvider -Name "Nuget" -Force
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-Expand-Archive -LiteralPath $SetupFile -DestinationPath $LabfilesFolder -Force
+Expand-Archive -LiteralPath $SetupFile -DestinationPath $WorkFolder -Force -ErrorAction "SilentlyContinue"
+Copy-Item -Path $WorkFolder"*" -Destination $Classfiles -Recurse -Force -ErrorAction "SilentlyContinue"
 Enable-NetFirewallRule -DisplayName "File and Printer Sharing*"
 Get-DNSClient -InterfaceAlias Ethernet* | Set-DNSClient -ConnectionSpecificSuffix "contoso.com"
 # Get-DNSClient -InterfaceAlias Ethernet* | Set-DNSClientServerAddress -ServerAddresses ("192.168.10.100","192.168.20.100")
 reg import c:\labfiles.50331d\LocalLogonAdminz.reg
 REG ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce /d c:\labfiles.50331d\run.cmd /f
 shutdown /r /t 15
-
-
