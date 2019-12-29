@@ -3,8 +3,9 @@
 Set-StrictMode -Version 2.0
 $SubscriptionName = (Get-AzureRMSubscription)[0].Name                  # This variable should be assigned your "Subscription Name"
 $CloudDriveMP = (Get-CloudDrive).MountPoint
-New-PSDrive -Name "F" -PSProvider "FileSystem" -Root $CloudDriveMP
-$WorkFolder = "f:\labfiles.50331d\"
+# New-PSDrive -Name "F" -PSProvider "FileSystem" -Root $CloudDriveMP
+# $WorkFolder = "f:\labfiles.50331d\"
+$WorkFolder = "/home/$env:USER/clouddrive/labfiles.50331d/"
 Set-Location $WorkFolder
 $AzureSetupFiles = $WorkFolder + "50331azuresetup.zip"
 Expand-Archive $AzureSetupFiles $WorkFolder -Force -ErrorAction "SilentlyContinue"
